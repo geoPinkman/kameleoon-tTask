@@ -1,0 +1,19 @@
+target
+.DS_Store
+
+.vcs_ref
+
+.idea
+*.iws
+*.ipr
+*.iml
+
+.tmp.*
+eth-wallet.json
+
+# kubeclt
+*.kube
+
+# local integration tests
+_IT_*.java
+
