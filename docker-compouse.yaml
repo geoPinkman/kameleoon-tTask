@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:13.6-alpine'
+    container_name: 'kameleoon-db'
+    ports:
+      - 5432:5432
+    environment:
+      - 'POSTGRES_DB=tTask'
+      - 'POSTGRES_USER=kameleoon'
+      - 'POSTGRES_PASSWORD=s3cr3t'
