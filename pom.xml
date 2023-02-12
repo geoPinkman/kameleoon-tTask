@@ -118,7 +118,7 @@
 						</database>
 						<generate/>
 						<target>
-							<packageName>org.tTask.database</packageName>
+							<packageName>org.testTask.database</packageName>
 							<directory>target/generated-sources/jooq</directory>
 						</target>
 					</generator>

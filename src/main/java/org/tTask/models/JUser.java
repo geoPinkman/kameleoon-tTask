@@ -15,6 +15,6 @@ public class JUser {
 
     public final String password;
 
-    public final long createdAt;
+    public final String createdAt;
 
 }
