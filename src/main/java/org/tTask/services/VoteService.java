@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.UpdateQuery;
+import org.springframework.stereotype.Service;
 import org.tTask.models.JVote;
 
 import static org.testTask.database.tables.Votes.VOTES;
 import org.testTask.database.tables.records.VotesRecord;
 
+@Service
 @AllArgsConstructor
 public class VoteService {
 
@@ -38,8 +40,8 @@ public class VoteService {
                 .value1();
     }
 
-    public void create(){
-        dslContext.insertInto(VOTES).defaultValues().execute();
+    public int create(){
+       return dslContext.insertInto(VOTES).defaultValues().execute();
     }
 
     public JVote getVoteById(int id) {
