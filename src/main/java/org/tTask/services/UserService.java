@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 public class UserService {
 
     private final DSLContext dslContext;
+    private final QuoteService quoteService;
 
     private JUser parseUser(Record r) {
         return JUser.builder()
@@ -25,6 +26,7 @@ public class UserService {
                 .name(r.get(USERS.NAME))
                 .email(r.get(USERS.EMAIL))
                 .createdAt(r.get(USERS.CREATED_AT).toString())
+                .quotesList(quoteService.getQuotesByUserId(r.get(USERS.ID)))
                 .build();
     }
 
@@ -45,10 +47,12 @@ public class UserService {
     }
 
     public JUser createUser(QUser user) {
+        String hPass = StringToBytes.getCodeString(user.password);
+
         int id = dslContext.insertInto(USERS)
                 .set(USERS.NAME, user.name)
                 .set(USERS.EMAIL, user.email)
-                .set(USERS.PASSWORD, StringToBytes.getCodeString(user.password))
+                .set(USERS.PASSWORD, hPass)
                 .set(USERS.CREATED_AT, Instant.now().atOffset(ZoneOffset.UTC))
                 .execute();
 
@@ -97,7 +101,8 @@ public class UserService {
 
     public void deleteUserById(int id) {
         dslContext.delete(USERS)
-                .where(USERS.ID.eq(id));
+                .where(USERS.ID.eq(id))
+                .execute();
     }
 
     @AllArgsConstructor

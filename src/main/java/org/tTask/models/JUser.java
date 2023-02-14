@@ -13,8 +13,10 @@ public class JUser {
 
     public final String email;
 
-    public final String password;
+    //public final String password;
 
     public final String createdAt;
+
+    public final JQuote.JQuotes quotesList;
 
 }

@@ -20,6 +20,10 @@ public class SwaggerConfig {
     }
 
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("").description("").version("1.0").build();
+        return new ApiInfoBuilder()
+                .title("kameleoon")
+                .description("test-task for kameleoon")
+                .version("1.0")
+                .build();
     }
 }

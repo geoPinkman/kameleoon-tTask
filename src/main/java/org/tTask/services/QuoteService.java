@@ -65,37 +65,60 @@ public class QuoteService {
                 .orElseThrow(() -> new RuntimeException("Some wrong"));
     }
 
-    public JQuote.JQuotes getBestQuotesByUserId(int userId) {
+    public JQuote.JQuotes getBestQuotesByUserId(int userId, int numberOfRows) {
         return new JQuote.JQuotes(dslContext.select(QUOTES.CREATED_AT, QUOTES.CONTENT, USERS.NAME, VOTES.LIKE, VOTES.DISLIKE)
                 .from(QUOTES)
                 .join(USERS).on(QUOTES.USER_ID.eq(USERS.ID))
                 .join(VOTES).on(QUOTES.VOTE_ID.eq(VOTES.ID))
                 .where(USERS.ID.eq(userId))
                 .orderBy(VOTES.LIKE.desc())
+                .limit(numberOfRows)
                 .fetchStream()
                 .map(this::parseQuote)
                 .collect(Collectors.toUnmodifiableList()));
     }
 
-    public JQuote.JQuotes getWorstQuotesByUserId(int userId) {
+    public JQuote.JQuotes getWorstQuotesByUserId(int userId, int numberOfRows) {
         return new JQuote.JQuotes(dslContext.select(QUOTES.CREATED_AT, QUOTES.CONTENT, USERS.NAME, VOTES.LIKE, VOTES.DISLIKE)
                 .from(QUOTES)
                 .join(USERS).on(QUOTES.USER_ID.eq(USERS.ID))
                 .join(VOTES).on(QUOTES.VOTE_ID.eq(VOTES.ID))
                 .where(USERS.ID.eq(userId))
                 .orderBy(VOTES.DISLIKE.desc())
+                .limit(numberOfRows)
                 .fetchStream()
                 .map(this::parseQuote)
                 .collect(Collectors.toUnmodifiableList()));
     }
 
+    public JQuote.JQuotes getQuotesByUserId(int userId) {
+        return new JQuote.JQuotes(dslContext.select(QUOTES.CREATED_AT, QUOTES.CONTENT, USERS.NAME, VOTES.LIKE, VOTES.DISLIKE)
+                .from(QUOTES)
+                .join(USERS).on(QUOTES.USER_ID.eq(USERS.ID))
+                .join(VOTES).on(QUOTES.VOTE_ID.eq(VOTES.ID))
+                .where(USERS.ID.eq(userId))
+                .fetchStream()
+                .map(this::parseQuote)
+                .collect(Collectors.toList()));
+    }
+
+    public int getUserIdById(int id) {
+        return dslContext.select(QUOTES.USER_ID).from(QUOTES)
+                .where(QUOTES.ID.eq(id))
+                .fetchOptional()
+                .map(Record1::value1)
+                .orElseThrow(() -> new RuntimeException("Some wrong"));
+    }
+
     public JQuote updateQuote(int userId, int quoteId, String content) {
-        UpdateQuery<QuotesRecord> q = dslContext.updateQuery(QUOTES);
-        q.addValue(QUOTES.CONTENT, content);
-        q.addValue(QUOTES.UPDATED_AT, Instant.now().atOffset(ZoneOffset.UTC));
-        q.addConditions(QUOTES.ID.eq(quoteId)
-                .and(QUOTES.USER_ID.eq(userId)));
-        q.execute();
+        if (userId == getUserIdById(quoteId)) {
+            UpdateQuery<QuotesRecord> q = dslContext.updateQuery(QUOTES);
+            q.addValue(QUOTES.CONTENT, content);
+            q.addValue(QUOTES.UPDATED_AT, Instant.now().atOffset(ZoneOffset.UTC));
+            q.addConditions(QUOTES.ID.eq(quoteId)
+                    .and(QUOTES.USER_ID.eq(userId)));
+            q.execute();
+        }
         return getQuoteById(quoteId);
     }
 
@@ -104,9 +127,15 @@ public class QuoteService {
         return getQuoteById(quoteId);
     }
 
-    public void deleteQuote(int id) {
-        dslContext.delete(QUOTES)
-                .where(QUOTES.ID.eq(id));
+    public void deleteQuote(int quoteId, int userId) {
+        if (getUserIdById(quoteId) == userId) {
+            dslContext.delete(QUOTES)
+                    .where(QUOTES.ID.eq(quoteId))
+                    .execute();
+        } else {
+            throw new RuntimeException("Oops");
+        }
+
     }
 
 }
